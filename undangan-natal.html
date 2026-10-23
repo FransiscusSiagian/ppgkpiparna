@@ -56,6 +56,16 @@ p{color:rgba(251,246,233,.85)}
 .stage.closed>:not(#cover){display:none}
 body.opened #cover{display:none}
 
+/* rapikan cover */
+#cover{text-align:center;padding:48px 28px;min-height:100vh;min-height:100dvh;width:100%}
+#cover .eyebrow{max-width:100%}
+#cover h1{font-size:clamp(1.9rem,9vw,2.4rem);width:100%}
+#cover .script{width:100%;text-align:center}
+.guestbox{width:100%;max-width:320px;text-align:center}
+.guestbox b{overflow-wrap:anywhere}
+#cover .btn{justify-content:center}
+@media (max-height:640px){#cover img{width:70px;margin-bottom:8px}.guestbox{margin:18px 0}}
+
 /* hero */
 #hero{padding-top:90px;min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;
   background:radial-gradient(ellipse at 50% 100%,rgba(192,36,46,.22),transparent 60%)}
@@ -106,7 +116,7 @@ body.opened .music.ok{display:grid}
 </head>
 <body class="locked">
 <div class="snow" id="snow" aria-hidden="true"></div>
-<audio id="bgm" src="files/musik-natal.mp3" loop preload="auto"></audio>
+<audio id="bgm" src="files/bgmusik.mp3" loop preload="auto"></audio>
 <button class="music" id="musicBtn" type="button" aria-label="Putar atau jeda musik"><span>♪</span></button>
 <div class="stage closed" id="stage">
 
@@ -128,7 +138,7 @@ body.opened .music.ok{display:grid}
   <h2 class="rv" style="font-size:1.1rem;font-weight:500;font-style:italic;margin:4px 0">mengundang Anda dalam sukacita</h2>
   <div class="big rv">Natal<em>Pemuda-Pemudi</em>2026</div>
   <div class="orn rv">❄</div>
-  <p class="verse rv">“Hari ini telah lahir bagimu Juruselamat, yaitu Kristus, Tuhan, di kota Daud.”<small>LUKAS 2:11</small></p>
+  <p class="verse rv">“ Lalu kata malaikat itu kepada mereka: "Jangan takut, sebab sesungguhnya aku memberitakan kepadamu kesukaan besar untuk seluruh bangsa: Hari ini telah lahir bagimu Juruselamat, yaitu Kristus, Tuhan, di kota Daud.” — Lukas 2:10-11</small></p>
 </section>
 
 <!-- COUNTDOWN -->
