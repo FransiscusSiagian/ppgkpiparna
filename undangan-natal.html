@@ -89,12 +89,25 @@ textarea{min-height:92px;resize:vertical}
 .closing .script{font-size:2.8rem;margin-top:10px}
 footer{padding:20px;text-align:center;font-size:.75rem;color:rgba(251,246,233,.5);border-top:1px solid rgba(233,196,106,.2)}
 footer a{color:var(--gold)}
-@media print{.snow,#cover{display:none!important}body.locked{overflow:visible;height:auto}.stage.closed>:not(#cover){display:block}}
+
+/* musik latar */
+.music{position:fixed;bottom:20px;right:max(16px,calc(50vw - 244px));z-index:70;width:48px;height:48px;border-radius:50%;
+  border:1px solid var(--gold);background:rgba(7,26,20,.88);color:var(--gold);cursor:pointer;display:none;place-items:center;font-size:1.3rem;
+  box-shadow:0 4px 16px rgba(0,0,0,.5);padding:0}
+body.opened .music.ok{display:grid}
+.music span{display:block;line-height:1}
+.music.playing span{animation:spin 3.5s linear infinite}
+.music.muted::after{content:"";position:absolute;width:30px;height:2px;background:var(--gold);transform:rotate(-45deg)}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.music.playing span{animation:none}}
+@media print{.music{display:none!important}.snow,#cover{display:none!important}body.locked{overflow:visible;height:auto}.stage.closed>:not(#cover){display:block}}
 @media (prefers-reduced-motion:reduce){.snow{display:none}.rv{opacity:1;transform:none;transition:none}}
 </style>
 </head>
 <body class="locked">
 <div class="snow" id="snow" aria-hidden="true"></div>
+<audio id="bgm" src="files/musik-natal.mp3" loop preload="auto"></audio>
+<button class="music" id="musicBtn" type="button" aria-label="Putar atau jeda musik"><span>♪</span></button>
 <div class="stage closed" id="stage">
 
 <!-- COVER -->
@@ -164,7 +177,7 @@ footer a{color:var(--gold)}
     <label>Nama<input id="f-nama" required maxlength="60" autocomplete="name"></label>
     <label>Kehadiran
       <select id="f-hadir"><option>Ya, saya akan hadir</option><option>Maaf, saya tidak dapat hadir</option></select></label>
-    <label>Jumlah orang<input id="f-jml" type="number" min="1" step="1" value="1" required></label>
+    <label>Jumlah orang<select id="f-jml"><option>1</option><option>2</option><option>3</option><option>4</option><option>5+</option></select></label>
     <label>Ucapan &amp; doa<textarea id="f-ucap" maxlength="300" placeholder="Tulis ucapan Natal Anda…"></textarea></label>
     <button class="btn" type="submit" style="justify-content:center">Kirim via WhatsApp</button>
   </form>
@@ -189,8 +202,18 @@ footer a{color:var(--gold)}
   var m=location.search.match(/[?&]untuk=([^&]+)/), n="";
   if(m){try{n=decodeURIComponent(m[1].replace(/\+/g," ")).slice(0,60)}catch(e){}}
   if(n){$("guest").textContent=n;$("f-nama").value=n}
+  /* musik latar: letakkan file di files/musik-natal.mp3 */
+  var bgm=$("bgm"),mb=$("musicBtn"),wasPlaying=false;
+  function sync(){mb.classList.toggle("playing",!bgm.paused);mb.classList.toggle("muted",bgm.paused)}
+  bgm.addEventListener("canplay",function(){mb.classList.add("ok")});
+  bgm.addEventListener("error",function(){mb.classList.remove("ok")});
+  bgm.addEventListener("play",sync);bgm.addEventListener("pause",sync);
+  mb.onclick=function(){bgm.paused?bgm.play().catch(function(){}):bgm.pause()};
+  document.addEventListener("visibilitychange",function(){
+    if(document.hidden){wasPlaying=!bgm.paused;bgm.pause()}else if(wasPlaying){bgm.play().catch(function(){})}});
   /* buka undangan */
   $("openBtn").onclick=function(){
+    bgm.volume=.6;bgm.play().catch(function(){});
     var c=$("cover");c.style.transform="translateY(-100%)";c.style.opacity="0";
     setTimeout(function(){document.body.classList.remove("locked");document.body.classList.add("opened");
       $("stage").classList.remove("closed");window.scrollTo(0,0);reveal()},900);
