@@ -196,3 +196,55 @@
     window.scrollTo({ top: 0, behavior: "smooth" });
   });
 })();
+
+
+/* Salju Natal (hanya jika tema Natal aktif) */
+(function () {
+  if (!document.documentElement.classList.contains("natal")) return;
+  var box = document.getElementById("snow");
+  if (!box) return;
+  if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  var count = window.innerWidth < 700 ? 18 : 34;
+  var glyphs = ["❄", "❅", "❆"];
+  for (var i = 0; i < count; i++) {
+    var f = document.createElement("i");
+    f.textContent = glyphs[i % glyphs.length];
+    f.style.left = Math.random() * 100 + "%";
+    f.style.fontSize = 10 + Math.random() * 14 + "px";
+    f.style.animationDuration = 9 + Math.random() * 11 + "s";
+    f.style.animationDelay = -Math.random() * 20 + "s";
+    f.style.opacity = 0.45 + Math.random() * 0.45;
+    f.style.setProperty("--drift", Math.round(Math.random() * 80 - 40) + "px");
+    box.appendChild(f);
+  }
+})();
+
+
+/* Salju khusus hero */
+(function () {
+  var box = document.getElementById("heroSnow");
+  if (!box) return;
+  if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  var count = window.innerWidth < 700 ? 16 : 30, g = ["❄", "❅", "❆"];
+  for (var i = 0; i < count; i++) {
+    var f = document.createElement("i");
+    f.textContent = g[i % 3];
+    f.style.left = Math.random() * 100 + "%";
+    f.style.fontSize = 10 + Math.random() * 14 + "px";
+    f.style.animationDuration = 8 + Math.random() * 9 + "s";
+    f.style.animationDelay = -Math.random() * 16 + "s";
+    f.style.opacity = 0.45 + Math.random() * 0.45;
+    f.style.setProperty("--drift", Math.round(Math.random() * 80 - 40) + "px");
+    box.appendChild(f);
+  }
+})();
+
+
+/* Tombol tata acara: nonaktif jika PDF belum diunggah */
+(function () {
+  var btn = document.getElementById("tataAcaraBtn");
+  if (!btn || !window.fetch) return;
+  fetch(btn.getAttribute("href"), { method: "HEAD" }).then(function (r) {
+    if (!r.ok) { btn.classList.add("is-disabled"); btn.removeAttribute("download"); btn.textContent = "📄 Tata Acara — Segera hadir"; btn.setAttribute("aria-disabled", "true"); }
+  }).catch(function () { /* mis. dibuka lewat file:// — biarkan tombol aktif */ });
+})();

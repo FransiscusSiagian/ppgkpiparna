@@ -25,15 +25,9 @@
 html {
   scroll-behavior: smooth;
   scroll-padding-top: 96px;
-  -webkit-text-size-adjust: 100%;
-  text-size-adjust: 100%;
-  width: 100%;
-  overflow-x: hidden;
 }
 body {
   margin: 0;
-  width: 100%;
-  min-width: 0;
   background: var(--paper);
   color: var(--ink);
   font-family:
@@ -43,12 +37,10 @@ body {
     "Segoe UI",
     sans-serif;
   -webkit-font-smoothing: antialiased;
-  padding-top: env(safe-area-inset-top, 0px);
   padding-bottom: env(safe-area-inset-bottom, 0px);
   overflow-x: hidden;
 }
-img,
-svg {
+img {
   max-width: 100%;
   display: block;
 }
@@ -56,21 +48,10 @@ a {
   color: inherit;
   text-decoration: none;
 }
-p,
-h1,
-h2,
-h3,
-h4,
-span,
-a {
-  overflow-wrap: break-word;
-  word-break: break-word;
-}
 .wrap {
   max-width: 1160px;
   margin: 0 auto;
-  padding: 0 clamp(18px, 5vw, 28px);
-  width: 100%;
+  padding: 0 28px;
 }
 h1,
 h2,
@@ -92,11 +73,6 @@ p {
 @media (max-width: 720px) {
   .section-pad {
     padding: 72px 0;
-  }
-}
-@media (max-width: 380px) {
-  .section-pad {
-    padding: 56px 0;
   }
 }
 
@@ -249,17 +225,6 @@ p {
   }
   .nav-inner {
     padding: 8px 16px;
-    gap: 12px;
-  }
-  .brand {
-    min-width: 0;
-  }
-  .brand-text {
-    min-width: 0;
-  }
-  .brand-text b {
-    display: block;
-    overflow-wrap: break-word;
   }
   .nav-links {
     position: fixed;
@@ -589,24 +554,9 @@ p {
     min-height: auto;
   }
   .hero::before {
-    content: none;
-  }
-  .hero-copy {
-    position: relative;
-    z-index: 2;
-    isolation: isolate;
-  }
-  .hero-copy::before {
-    content: "";
-    position: absolute;
-    top: -110px;
-    left: -10%;
-    right: -10%;
-    bottom: -40px;
-    background: var(--deep-blend);
+    top: -10%; left: -10%; right: -10%; 
+    height: 70%; width: 120%;
     border-radius: 0 0 50% 50% / 0 0 15% 15%;
-    z-index: -1;
-    pointer-events: none;
   }
   .hero-copy {
     padding: 32px 28px 20px;
@@ -647,38 +597,6 @@ p {
     min-height: 68px;
     padding: 10px 4px;
     font-size: 0.75rem;
-  }
-}
-@media (max-width: 380px) {
-  .hero-copy {
-    padding: 40px 18px 44px;
-  }
-  .hero-visual {
-    padding: 24px 18px 44px;
-  }
-  .hero-meta-card b {
-    font-size: 0.9rem;
-  }
-  .hero-actions {
-    gap: 10px;
-  }
-  .btn {
-    padding: 13px 20px;
-    font-size: 0.9rem;
-  }
-}
-@media (max-width: 900px) and (max-height: 560px) and (orientation: landscape) {
-  .hero {
-    min-height: auto;
-  }
-  .hero-copy {
-    padding: 84px 28px 24px;
-  }
-  .hero-visual {
-    padding: 12px 28px 28px;
-  }
-  .hero-visual img {
-    width: min(30vw, 160px);
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -892,14 +810,6 @@ p {
     display: none;
   }
 }
-@media (max-width: 380px) {
-  .sched-row {
-    padding: 18px 0;
-  }
-  .sched-row h4 {
-    font-size: 1rem;
-  }
-}
 .sched-note {
   margin-top: 26px;
   font-size: 0.85rem;
@@ -947,12 +857,6 @@ p {
   flex-direction: column;
   justify-content: space-between;
   transition: background 0.25s;
-}
-@media (max-width: 380px) {
-  .moment-card {
-    padding: 26px 20px;
-    min-height: 180px;
-  }
 }
 .moment-card:hover {
   background: linear-gradient(145deg, #f5f7fa 0%, #e2ebf5 100%);
@@ -1104,11 +1008,6 @@ p {
   background: linear-gradient(145deg, #f9fbfd 0%, #eaf0f6 100%);
   padding: 26px 20px;
 }
-@media (max-width: 380px) {
-  .org-card {
-    padding: 18px 14px;
-  }
-}
 .org-photo {
   width: 100%;
   aspect-ratio: 4/5;
@@ -1222,15 +1121,6 @@ footer {
   .foot-grid {
     grid-template-columns: 1fr;
     gap: 30px;
-  }
-}
-@media (max-width: 380px) {
-  footer {
-    padding: 48px 0 26px;
-  }
-  .foot-bottom {
-    justify-content: flex-start;
-    gap: 14px;
   }
 }
 .foot-brand {
@@ -1520,12 +1410,6 @@ footer ul a:hover {
   font-size: 1.06rem;
   color: var(--ink);
 }
-@media (max-width: 380px) {
-  .faq-q {
-    gap: 12px;
-    font-size: 0.96rem;
-  }
-}
 .faq-q .plus {
   flex: none;
   width: 26px;
@@ -1610,4 +1494,214 @@ footer ul a:hover {
 .to-top svg {
   width: 18px;
   height: 18px;
+}
+
+
+/* =====================================================
+   TEMA NATAL 2026  (aktif via class "natal" pada <html>)
+   ===================================================== */
+.natal-only { display: none; }
+html.natal .natal-only { display: revert; }
+
+html.natal {
+  --ink: #0f2e22;
+  --ink-2: #1b5a3f;
+  --deep: #071a14;
+  --ember: #c0242e;
+  --ember-2: #ef5a60;
+  --brass: #f0cf7a;
+  --paper: #faf7f0;
+  --paper-2: #f0ebdd;
+  --paper-blend: linear-gradient(135deg, #fdfbf5 0%, #f1ede0 58%, #f8f5ec 100%);
+  --paper-alt-blend: linear-gradient(125deg, #efe9da 0%, #f8f5ec 100%);
+  --blue-blend: linear-gradient(135deg, #0f2e22 0%, #1b5a3f 100%);
+  --deep-blend: linear-gradient(130deg, #071a14 0%, #0f2e22 58%, #1b5a3f 100%);
+  --line: rgba(15, 46, 34, 0.13);
+  --ink-soft: rgba(15, 46, 34, 0.7);
+}
+html.natal .gallery { background: linear-gradient(125deg, #14452f 0%, #1b5a3f 54%, #0f2e22 100%); }
+html.natal .moment-card { background: linear-gradient(145deg, #efe9da 0%, #faf7f0 100%); }
+html.natal .moment-card:hover { background: linear-gradient(145deg, #faf7f0 0%, #ece4cf 100%); }
+html.natal .org-card { background: linear-gradient(145deg, #fdfbf5 0%, #f0ebdd 100%); }
+html.natal .org-photo { background: linear-gradient(145deg, #e8e0cb 0%, #faf7f0 100%); }
+html.natal .welcome { background: linear-gradient(120deg, #eee7d4 0%, #f8f5ec 52%, #efe9da 100%); }
+html.natal .welcome-photo { background: linear-gradient(145deg, #0f2e22 0%, #1b5a3f 72%, #c0242e 160%); }
+html.natal .faq { background: linear-gradient(135deg, #fdfbf5 0%, #f1ede0 50%, #faf7f0 100%); }
+html.natal .stat-item { background: linear-gradient(145deg, #0f2e22 0%, #17503a 100%); }
+html.natal footer { background: linear-gradient(135deg, #05140f 0%, #071a14 55%, #14452f 100%); }
+html.natal .nav { background: rgba(253, 251, 245, 0.9); border-color: rgba(15, 46, 34, 0.12); }
+html.natal .nav-links a:hover,
+html.natal .nav-links a.active:not(.nav-cta) { background: rgba(27, 90, 63, 0.1); }
+html.natal .brand img { border-color: rgba(27, 90, 63, 0.18); }
+html.natal .hero::before { box-shadow: inset -18px 0 60px rgba(240, 207, 122, 0.08); }
+html.natal .verse-strip { background: linear-gradient(115deg, #a81f2b 0%, #c0242e 50%, #a81f2b 100%); }
+html.natal .btn-primary { box-shadow: 0 6px 18px rgba(192, 36, 46, 0.3); }
+
+/* lampu hias */
+.natal-lights {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 26px;
+  z-index: 65;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 12px 12px, #ef5a60 0 4px, transparent 5px) 0 0 / 96px 26px repeat-x,
+    radial-gradient(circle at 36px 15px, #f0cf7a 0 4px, transparent 5px) 0 0 / 96px 26px repeat-x,
+    radial-gradient(circle at 60px 12px, #5fd08d 0 4px, transparent 5px) 0 0 / 96px 26px repeat-x,
+    radial-gradient(circle at 84px 15px, #7fb4ff 0 4px, transparent 5px) 0 0 / 96px 26px repeat-x;
+  filter: drop-shadow(0 0 5px rgba(255, 220, 140, 0.7));
+  animation: natal-twinkle 2.4s ease-in-out infinite alternate;
+}
+.natal-lights::before {
+  content: "";
+  position: absolute;
+  top: 3px; left: 0; right: 0;
+  height: 2px;
+  background: rgba(7, 26, 20, 0.55);
+}
+@keyframes natal-twinkle {
+  from { opacity: 1; }
+  to { opacity: 0.55; }
+}
+
+/* salju */
+.snow {
+  position: fixed;
+  inset: 0;
+  z-index: 66;
+  pointer-events: none;
+  overflow: hidden;
+}
+.snow i {
+  position: absolute;
+  top: -12px;
+  color: #fff;
+  text-shadow: 0 0 4px rgba(15, 46, 34, 0.45);
+  font-style: normal;
+  line-height: 1;
+  opacity: 0.85;
+  animation: snow-fall linear infinite;
+}
+@keyframes snow-fall {
+  to { transform: translate3d(var(--drift, 30px), 105vh, 0) rotate(240deg); }
+}
+
+/* hero */
+.natal-badge {
+  align-self: flex-start;
+  margin-bottom: 18px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: rgba(240, 207, 122, 0.14);
+  border: 1px solid rgba(240, 207, 122, 0.55);
+  color: var(--brass);
+  font-weight: 700;
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+}
+.natal-greet {
+  margin-top: 22px;
+  max-width: 46ch;
+  font-family: "Lora", serif;
+  font-style: italic;
+  font-size: 0.95rem;
+  color: rgba(245, 247, 250, 0.82);
+  border-left: 3px solid var(--brass);
+  padding-left: 14px;
+}
+html.natal .hero-visual img {
+  filter: drop-shadow(0 20px 32px rgba(15, 46, 34, 0.3)) drop-shadow(0 0 22px rgba(240, 207, 122, 0.35));
+}
+html.natal .moment-natal {
+  outline: 2px solid var(--ember);
+  outline-offset: -2px;
+  background: linear-gradient(145deg, #fff5f2 0%, #faf7f0 100%);
+}
+html.natal .moment-natal svg { color: var(--ember); }
+@media (max-width: 900px) {
+  .natal-badge { margin-bottom: 14px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .natal-lights { animation: none; }
+  .snow { display: none; }
+}
+
+
+/* =====================================================
+   HERO NATAL 2026 (selalu aktif, tidak tergantung tanggal)
+   ===================================================== */
+.hero-natal::before { background: linear-gradient(130deg, #071a14 0%, #0f2e22 58%, #1b5a3f 100%); box-shadow: inset -18px 0 60px rgba(240, 207, 122, 0.08); }
+.hero-natal { background: linear-gradient(135deg, #fdfbf5 0%, #f1ede0 58%, #f8f5ec 100%); }
+.hero-natal .eyebrow-plain { color: #f0cf7a; }
+.hero-natal h1 { max-width: 12ch; }
+.hero-natal h1 em { color: #f0cf7a; }
+.hero-natal .hero-verse {
+  margin-top: 18px;
+  max-width: 46ch;
+  font-family: "Lora", serif;
+  font-style: italic;
+  font-size: 0.95rem;
+  color: rgba(245, 247, 250, 0.82);
+  border-left: 3px solid #f0cf7a;
+  padding-left: 14px;
+}
+.hero-natal .btn-primary { background: linear-gradient(115deg, #a81f2b 0%, #d8343d 100%); box-shadow: 0 6px 18px rgba(192, 36, 46, 0.35); }
+.hero-natal .hero-visual img {
+  filter: drop-shadow(0 20px 32px rgba(15, 46, 34, 0.3)) drop-shadow(0 0 24px rgba(240, 207, 122, 0.4));
+}
+.hero-lights {
+  position: absolute; top: 0; left: 0; right: 0; height: 26px; z-index: 3; pointer-events: none;
+  background:
+    radial-gradient(circle at 12px 12px, #ef5a60 0 4px, transparent 5px) 0 0 / 96px 26px repeat-x,
+    radial-gradient(circle at 36px 15px, #f0cf7a 0 4px, transparent 5px) 0 0 / 96px 26px repeat-x,
+    radial-gradient(circle at 60px 12px, #5fd08d 0 4px, transparent 5px) 0 0 / 96px 26px repeat-x,
+    radial-gradient(circle at 84px 15px, #7fb4ff 0 4px, transparent 5px) 0 0 / 96px 26px repeat-x;
+  filter: drop-shadow(0 0 5px rgba(255, 220, 140, 0.7));
+  animation: natal-twinkle 2.4s ease-in-out infinite alternate;
+}
+.hero-lights::before { content: ""; position: absolute; top: 3px; left: 0; right: 0; height: 2px; background: rgba(7, 26, 20, 0.55); }
+.hero-snow { position: absolute; inset: 0; z-index: 3; pointer-events: none; overflow: hidden; }
+.hero-snow i {
+  position: absolute; top: -12px; color: #fff; font-style: normal; line-height: 1;
+  text-shadow: 0 0 4px rgba(15, 46, 34, 0.45);
+  animation: hero-snow-fall linear infinite;
+}
+@keyframes hero-snow-fall { to { transform: translate3d(var(--drift, 30px), 110vh, 0) rotate(240deg); } }
+@media (prefers-reduced-motion: reduce) { .hero-lights { animation: none; } .hero-snow { display: none; } }
+html.natal .natal-lights { display: none; }
+
+.event-date {
+  display: inline-block;
+  margin-bottom: 8px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #c0242e;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+/* Jadwal Natal di hero */
+.natal-schedule {
+  display: flex; align-items: center; gap: 16px;
+  margin-top: 24px; padding: 14px 18px; max-width: 480px;
+  border: 1px solid rgba(240, 207, 122, 0.45);
+  background: rgba(240, 207, 122, 0.08);
+  border-radius: 8px;
+}
+.natal-schedule-date {
+  flex: none; display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px; border-radius: 6px; background: #c0242e; color: #fff;
+}
+.natal-schedule-date b { font-size: 2rem; line-height: 1; font-weight: 800; }
+.natal-schedule-date span { font-size: 0.7rem; line-height: 1.15; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+.natal-schedule-info h3 { font-size: 1.05rem; color: #f0cf7a; margin: 0 0 4px; }
+.natal-schedule-info p { margin: 0; font-size: 0.88rem; color: rgba(245, 247, 250, 0.9); }
+.natal-schedule-info .muted { color: rgba(245, 247, 250, 0.6); font-size: 0.8rem; margin-top: 2px; }
+.hero-actions-natal .btn { padding: 12px 20px; font-size: 0.9rem; }
+.btn.is-disabled { opacity: 0.55; pointer-events: none; border-style: dashed; }
+@media (max-width: 560px) {
+  .natal-schedule { flex-direction: column; align-items: flex-start; }
+  .hero-actions-natal .btn { width: 100%; justify-content: center; }
 }
