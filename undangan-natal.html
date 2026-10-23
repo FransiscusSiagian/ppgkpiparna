@@ -208,7 +208,6 @@ body.opened .music.ok{display:grid}
   <div class="script rv">Selamat Natal 2026</div>
   <p class="rv serif" style="font-size:1.2rem;margin-top:10px">Kami yang berbahagia,<br><b>PP GKPI Parsaoran Nauli</b></p>
   <p class="rv" style="margin-top:20px"><a class="btn ghost" href="https://www.instagram.com/ppgkpiparnaa/" target="_blank" rel="noopener noreferrer">Instagram @ppgkpiparnaa</a></p>
-  <p class="rv" style="margin-top:20px"><a class="btn ghost" href="https://www.tiktok.com/@ppgkpiparna?_r=1&_t=ZS-9Ao7ahXvMHg" target="_blank" rel="noopener noreferrer">TikTok @ppgkpiparna</a></p>
 </section>
 <footer>© 2026 PP GKPI Parsaoran Nauli, Medan · <a href="index.html">Kembali ke beranda</a></footer>
 </div>
@@ -260,7 +259,21 @@ body.opened .music.ok{display:grid}
   var gcal=$("calGoogle");
   if(gcal){gcal.href="https://calendar.google.com/calendar/render?action=TEMPLATE&text="+encodeURIComponent(EVENT.title)+"&dates="+calDates().g+(EVENT.start?"&ctz=Asia/Jakarta":"")+"&location="+encodeURIComponent(EVENT.place)+"&details="+encodeURIComponent(EVENT.desc)}
   var icsBtn=$("calIcs");
+  /* Android: buka layar "acara baru" di aplikasi kalender langsung (tanpa unduh) */
+  function androidIntent(){
+    var y=+EVENT.date.slice(0,4),m=+EVENT.date.slice(4,6)-1,dd=+EVENT.date.slice(6,8),b,e,allDay=!EVENT.start;
+    if(allDay){b=Date.UTC(y,m,dd);e=Date.UTC(y,m,dd+1)}
+    else{var s=EVENT.start,t=EVENT.end||EVENT.start;b=Date.UTC(y,m,dd,+s.slice(0,2)-7,+s.slice(2,4));e=Date.UTC(y,m,dd,+t.slice(0,2)-7,+t.slice(2,4))}
+    var q=encodeURIComponent,fb=gcal?gcal.href:"https://calendar.google.com";
+    return "intent:#Intent;action=android.intent.action.INSERT;type=vnd.android.cursor.dir/event;"+
+      "S.title="+q(EVENT.title)+";S.eventLocation="+q(EVENT.place)+";S.description="+q(EVENT.desc)+
+      ";l.beginTime="+b+";l.endTime="+e+";B.allDay="+allDay+";S.browser_fallback_url="+q(fb)+";end";
+  }
   if(icsBtn){icsBtn.onclick=function(){
+    var ua=navigator.userAgent||"";
+    if(/Android/i.test(ua)){location.href=androidIntent();return}
+    /* iPhone/iPad: membuka file .ics yang dihosting memunculkan layar "Tambahkan ke Kalender" langsung */
+    if(/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1)){location.href="files/natal-2026.ics";return}
     var d=calDates(),L=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//PP GKPI Parsaoran Nauli//Undangan Natal 2026//ID","CALSCALE:GREGORIAN","METHOD:PUBLISH","BEGIN:VEVENT",
       "UID:natal-pp-2026-"+EVENT.date+"@ppgkpiparnaa","DTSTAMP:"+new Date().toISOString().replace(/[-:]|\.\d{3}/g,"")].concat(d.ics,
       ["SUMMARY:"+icsEsc(EVENT.title),"LOCATION:"+icsEsc(EVENT.place),"DESCRIPTION:"+icsEsc(EVENT.desc),
