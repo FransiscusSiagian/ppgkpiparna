@@ -187,7 +187,7 @@ body.opened .music.ok{display:grid}
     <label>Nama<input id="f-nama" required maxlength="60" autocomplete="name"></label>
     <label>Kehadiran
       <select id="f-hadir"><option>Ya, saya akan hadir</option><option>Maaf, saya tidak dapat hadir</option></select></label>
-    <label>Jumlah orang<select id="f-jml"><option>1</option><option>2</option><option>3</option><option>4</option><option>5+</option></select></label>
+    <label>Jumlah orang<input id="f-jml" type="number" min="1" step="1" value="1" required></label>
     <label>Ucapan &amp; doa<textarea id="f-ucap" maxlength="300" placeholder="Tulis ucapan Natal Anda…"></textarea></label>
     <button class="btn" type="submit" style="justify-content:center">Kirim via WhatsApp</button>
   </form>
