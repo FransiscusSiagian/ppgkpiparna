@@ -245,6 +245,6 @@
   var btn = document.getElementById("tataAcaraBtn");
   if (!btn || !window.fetch) return;
   fetch(btn.getAttribute("href"), { method: "HEAD" }).then(function (r) {
-    if (!r.ok) { btn.classList.add("is-disabled"); btn.removeAttribute("download"); btn.textContent = "📄 Tata Acara — Segera hadir"; btn.setAttribute("aria-disabled", "true"); }
+    if (!r.ok) { btn.classList.add("is-disabled"); btn.removeAttribute("download"); btn.innerHTML = '<span>📄 Tata Acara Ibadah Natal</span><span class="soon">Segera hadir</span>'; btn.setAttribute("aria-disabled", "true"); }
   }).catch(function () { /* mis. dibuka lewat file:// — biarkan tombol aktif */ });
 })();

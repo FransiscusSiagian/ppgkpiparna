@@ -39,6 +39,9 @@ p{color:rgba(251,246,233,.85)}
 .btn{display:inline-flex;align-items:center;gap:8px;padding:13px 26px;border-radius:999px;border:1px solid var(--gold);color:var(--g1);background:linear-gradient(120deg,var(--gold2),var(--gold));font-weight:600;font-size:.9rem;text-decoration:none;cursor:pointer;font-family:var(--sans);transition:transform .2s,box-shadow .2s}
 .btn:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(233,196,106,.3)}
 .btn.ghost{background:none;color:var(--gold)}
+.cal{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:440px;margin:26px auto 0}
+.cal .btn{justify-content:center;width:100%;min-height:50px;padding:12px 14px;text-align:center;white-space:nowrap}
+@media(max-width:420px){.cal{grid-template-columns:1fr;max-width:300px}}
 .btn.is-disabled{opacity:.5;pointer-events:none;border-style:dashed}
 .rv{opacity:0;transform:translateY(26px);transition:opacity .9s ease,transform .9s ease}
 .rv.in{opacity:1;transform:none}
@@ -151,7 +154,11 @@ body.opened .music.ok{display:grid}
     <div><b id="cd-m">--</b><span>Menit</span></div>
     <div><b id="cd-s">--</b><span>Detik</span></div>
   </div>
-  <p class="rv" id="cd-note" style="font-size:.85rem">menuju hari Natal Pemuda-Pemudi</p>
+  <p class="rv" id="cd-note" style="font-size:.85rem;margin-top:16px">menuju hari Natal Pemuda-Pemudi</p>
+  <div class="cal rv">
+    <button class="btn" id="calIcs" type="button">📅 Simpan ke Kalender</button>
+    <a class="btn ghost" id="calGoogle" href="#" target="_blank" rel="noopener noreferrer">🗓 Google Calendar</a>
+  </div>
 </section>
 
 <!-- EVENT -->
@@ -201,6 +208,7 @@ body.opened .music.ok{display:grid}
   <div class="script rv">Selamat Natal 2026</div>
   <p class="rv serif" style="font-size:1.2rem;margin-top:10px">Kami yang berbahagia,<br><b>PP GKPI Parsaoran Nauli</b></p>
   <p class="rv" style="margin-top:20px"><a class="btn ghost" href="https://www.instagram.com/ppgkpiparnaa/" target="_blank" rel="noopener noreferrer">Instagram @ppgkpiparnaa</a></p>
+  <p class="rv" style="margin-top:20px"><a class="btn ghost" href="https://www.tiktok.com/@ppgkpiparna?_r=1&_t=ZS-9Ao7ahXvMHg" target="_blank" rel="noopener noreferrer">TikTok @ppgkpiparna</a></p>
 </section>
 <footer>© 2026 PP GKPI Parsaoran Nauli, Medan · <a href="index.html">Kembali ke beranda</a></footer>
 </div>
@@ -235,6 +243,34 @@ body.opened .music.ok{display:grid}
     var io=new IntersectionObserver(function(es){es.forEach(function(x){if(x.isIntersecting){x.target.classList.add("in");io.unobserve(x.target)}})},{threshold:.15});
     els.forEach(function(e,i){e.style.transitionDelay=(i%4)*90+"ms";io.observe(e)});
   }
+  /* simpan ke kalender perangkat (.ics) + Google Calendar */
+  var EVENT={
+    title:"Natal Pemuda-Pemudi 2026 – PP GKPI Parsaoran Nauli",
+    date:"20261219",            /* YYYYMMDD */
+    start:null, end:null,       /* isi jika jam sudah pasti, contoh: start:"1700", end:"2000" (WIB) */
+    place:"GKPI Parsaoran Nauli, Jl. Setia Budi No.211, Tj. Rejo, Kec. Medan Sunggal, Kota Medan, Sumatera Utara 20122",
+    desc:"Ibadah Natal Pemuda-Pemudi 2026. Pukul: menyusul."
+  };
+  function nextDay(d){var t=new Date(Date.UTC(+d.slice(0,4),+d.slice(4,6)-1,+d.slice(6,8)+1));return t.toISOString().slice(0,10).replace(/-/g,"")}
+  function icsEsc(t){return String(t).replace(/\\/g,"\\\\").replace(/;/g,"\\;").replace(/,/g,"\\,").replace(/\n/g,"\\n")}
+  function calDates(){
+    if(EVENT.start) return {ics:["DTSTART;TZID=Asia/Jakarta:"+EVENT.date+"T"+EVENT.start+"00","DTEND;TZID=Asia/Jakarta:"+EVENT.date+"T"+(EVENT.end||EVENT.start)+"00"],g:EVENT.date+"T"+EVENT.start+"00/"+EVENT.date+"T"+(EVENT.end||EVENT.start)+"00"};
+    return {ics:["DTSTART;VALUE=DATE:"+EVENT.date,"DTEND;VALUE=DATE:"+nextDay(EVENT.date)],g:EVENT.date+"/"+nextDay(EVENT.date)};
+  }
+  var gcal=$("calGoogle");
+  if(gcal){gcal.href="https://calendar.google.com/calendar/render?action=TEMPLATE&text="+encodeURIComponent(EVENT.title)+"&dates="+calDates().g+(EVENT.start?"&ctz=Asia/Jakarta":"")+"&location="+encodeURIComponent(EVENT.place)+"&details="+encodeURIComponent(EVENT.desc)}
+  var icsBtn=$("calIcs");
+  if(icsBtn){icsBtn.onclick=function(){
+    var d=calDates(),L=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//PP GKPI Parsaoran Nauli//Undangan Natal 2026//ID","CALSCALE:GREGORIAN","METHOD:PUBLISH","BEGIN:VEVENT",
+      "UID:natal-pp-2026-"+EVENT.date+"@ppgkpiparnaa","DTSTAMP:"+new Date().toISOString().replace(/[-:]|\.\d{3}/g,"")].concat(d.ics,
+      ["SUMMARY:"+icsEsc(EVENT.title),"LOCATION:"+icsEsc(EVENT.place),"DESCRIPTION:"+icsEsc(EVENT.desc),
+      "BEGIN:VALARM","TRIGGER:-P7D","ACTION:DISPLAY","DESCRIPTION:Natal Pemuda-Pemudi 7 hari lagi","END:VALARM",
+      "BEGIN:VALARM","TRIGGER:-P1D","ACTION:DISPLAY","DESCRIPTION:Natal Pemuda-Pemudi besok","END:VALARM",
+      "END:VEVENT","END:VCALENDAR"]);
+    var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([L.join("\r\n")],{type:"text/calendar;charset=utf-8"}));
+    a.download="Natal-Pemuda-Pemudi-2026.ics";document.body.appendChild(a);a.click();
+    setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},800);
+  }}
   /* countdown ke 19 Des 2026 00:00 WIB (UTC+7) */
   var target=Date.UTC(2026,11,18,17,0,0);
   function tick(){

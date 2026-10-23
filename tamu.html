@@ -276,11 +276,22 @@ textarea{min-height:110px;resize:vertical}
     var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([text],{type:mime}));a.download=name;
     document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500);
   }
-  function csvCell(v){v=String(v==null?"":v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}
+  /* CSV rapi: pemisah titik-koma (cocok untuk Excel Indonesia), BOM UTF-8, nomor WA tetap utuh */
+  function csvCell(v){
+    v=String(v==null?"":v).replace(/\r?\n/g," ").trim();
+    if(/^[=+\-@]/.test(v))v="'"+v;                       /* cegah rumus tak sengaja */
+    return /[";]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;
+  }
+  function csvPhone(v){v=String(v||"").replace(/\D/g,"");return v?'="'+v+'"':""}   /* agar tidak jadi 6.28E+11 */
   $("exCsv").onclick=function(){
     if(!guests.length){toast("Daftar masih kosong");return}
-    var rows=[["Nama","WhatsApp","Jumlah","Kategori","Status","Link"]].concat(guests.map(function(g){return [g.nama,g.wa,g.jml,g.kat,STATUS[g.status],linkFor(g)]}));
-    download("daftar-tamu-natal-2026.csv","text/csv;charset=utf-8","\ufeff"+rows.map(function(r){return r.map(csvCell).join(",")}).join("\r\n"));
+    var head=["No","Nama","WhatsApp","Jumlah","Kategori","Status","Link Undangan"].map(csvCell).join(";");
+    var body=guests.map(function(g,i){
+      return [i+1,csvCell(g.nama),csvPhone(g.wa),g.jml,csvCell(g.kat),csvCell(STATUS[g.status]),csvCell(linkFor(g))].join(";");
+    });
+    var tot=guests.reduce(function(n,g){return n+(parseInt(g.jml,10)||0)},0);
+    body.push(["","TOTAL","",tot,"","",""].join(";"));
+    download("daftar-tamu-natal-2026.csv","text/csv;charset=utf-8","\ufeff"+[head].concat(body).join("\r\n"));
   };
   $("exJson").onclick=function(){
     if(!guests.length){toast("Daftar masih kosong");return}
