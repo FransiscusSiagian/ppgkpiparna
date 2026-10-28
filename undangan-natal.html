@@ -294,7 +294,7 @@ body.opened .music.ok{display:grid}
   tick();setInterval(tick,1000);
   /* RSVP -> Google Sheets (Apps Script), WhatsApp sebagai cadangan.
      Tempel alamat Web App di bawah. Jika dikosongkan, RSVP dikirim lewat WhatsApp saja. */
-  var SHEET_URL="https://script.google.com/macros/s/AKfycbzrlzN0C5Vmqvsgs3FEfGTHnMabwh6zFneljw7DURCjendyp7Z7JAKASqFmW_hKh-7SEw/exec";
+  var SHEET_URL="";
   var rsvpBtn=$("rsvpSend"),rsvpWa=$("rsvpWa"),rsvpMsg=$("rsvpMsg"),sending=false;
   function waRsvp(){
     var t="Shalom, saya "+$("f-nama").value.trim()+".\nKonfirmasi Natal Pemuda-Pemudi 2026 (19 Des 2026): "+$("f-hadir").value+

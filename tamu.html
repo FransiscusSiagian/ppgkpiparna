@@ -97,7 +97,7 @@ textarea{min-height:110px;resize:vertical}
   <p class="sub">Tambah tamu, buat link undangan personal (nama tamu otomatis tampil di sampul), lalu kirim lewat WhatsApp.</p>
 
   <div class="stats" id="stats"></div>
-  <div class="syncbar" id="syncBar" hidden><span id="syncMini"></span><button class="btn sm ghost" id="syncQuick" type="button">↻ Perbarui RSVP</button></div>
+  <div class="syncbar" id="syncBar" hidden><span id="syncMini"></span><button class="btn sm ghost" id="syncQuick" type="button">↻ Sinkron sekarang</button></div>
 
   <section class="panel">
     <h2 id="formTitle">Tambah tamu</h2>
@@ -128,11 +128,11 @@ textarea{min-height:110px;resize:vertical}
   </details>
 
   <details class="panel" id="syncPanel">
-    <summary>Sinkron RSVP (Google Sheets)</summary>
-    <p class="hint" style="margin:0 0 12px">RSVP dari tamu masuk ke Google Sheet Anda. Di sini panitia menarik data itu agar status <b>Hadir / Tidak hadir</b>, jumlah orang, dan ucapan terisi otomatis. Kode admin hanya disimpan di browser ini.</p>
+    <summary>Sinkron Google Sheets (daftar tamu &amp; RSVP)</summary>
+    <p class="hint" style="margin:0 0 12px">Daftar tamu dan RSVP disimpan di Google Sheet panitia dan <b>tersinkron otomatis ke semua perangkat</b> yang sudah dihubungkan. Status <b>Hadir / Tidak hadir</b>, jumlah orang, dan ucapan terisi dari RSVP. Kode admin hanya disimpan di browser ini.</p>
     <div class="field"><label>Alamat Web App (Apps Script)<input id="s-url" inputmode="url" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off"></label></div>
     <div class="field"><label>Kode admin<input id="s-key" type="password" autocomplete="off" placeholder="kode yang Anda tulis di Code.gs"></label></div>
-    <div class="row"><button class="btn sm" id="syncBtn" type="button">Simpan &amp; ambil RSVP</button><button class="btn sm ghost" id="syncOff" type="button">Putuskan</button></div>
+    <div class="row"><button class="btn sm" id="syncBtn" type="button">Simpan &amp; sinkron</button><button class="btn sm ghost" id="syncOff" type="button">Putuskan</button></div>
     <p class="hint" id="syncInfo"></p>
   </details>
 
@@ -159,7 +159,7 @@ textarea{min-height:110px;resize:vertical}
     <button class="btn sm danger" id="clearAll" type="button">Hapus semua</button>
     <input type="file" id="file" accept=".json,application/json" hidden>
   </div>
-  <p class="hint" style="margin-top:14px">Daftar disimpan di browser perangkat ini saja (tidak diunggah ke internet), jadi hanya Anda yang bisa melihatnya. Gunakan <b>Backup JSON</b> secara berkala, dan untuk memindahkan daftar ke HP/laptop lain.</p>
+  <p class="hint" id="storeHint" style="margin-top:14px"></p>
 </div>
 <div id="toast" role="status" aria-live="polite"></div>
 
@@ -176,7 +176,8 @@ textarea{min-height:110px;resize:vertical}
     try{guests=JSON.parse(localStorage.getItem(KEY)||"[]");if(!Array.isArray(guests))guests=[]}catch(e){guests=[]}
     try{tpl=localStorage.getItem(TKEY)||DEFAULT_TPL}catch(e){tpl=DEFAULT_TPL}
   }
-  function save(){try{localStorage.setItem(KEY,JSON.stringify(guests))}catch(e){toast("Penyimpanan browser tidak tersedia — data hanya sementara")}}
+  function persist(){try{localStorage.setItem(KEY,JSON.stringify(guests))}catch(e){toast("Penyimpanan browser tidak tersedia — data hanya sementara")}}
+  function save(){persist();schedSync()}
   function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
   function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
   var tt;function toast(m){var t=$("toast");t.textContent=m;t.classList.add("show");clearTimeout(tt);tt=setTimeout(function(){t.classList.remove("show")},2200)}
@@ -337,7 +338,7 @@ textarea{min-height:110px;resize:vertical}
   };
   $("clearAll").onclick=function(){
     if(!guests.length)return;
-    if(confirm("Hapus SEMUA "+guests.length+" tamu? Pastikan sudah backup. Tindakan ini tidak bisa dibatalkan.")){guests=[];save();render();toast("Daftar dikosongkan")}
+    var cc=cfg();if(confirm("Hapus SEMUA "+guests.length+" tamu?"+((cc.url&&cc.key)?" Daftar di Google Sheet dan di semua perangkat yang terhubung ikut terhapus.":" Pastikan sudah backup.")+" Tindakan ini tidak bisa dibatalkan.")){guests=[];save();render();toast("Daftar dikosongkan")}
   };
 
 
@@ -347,7 +348,13 @@ textarea{min-height:110px;resize:vertical}
   function saveCfg(c){try{localStorage.setItem(SKEY,JSON.stringify(c))}catch(e){toast("Penyimpanan browser tidak tersedia")}}
   function fmtTime(d){return d.toLocaleString("id-ID",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}
   function setInfo(t){$("syncInfo").textContent=t;$("syncMini").textContent=t}
-  function showBar(){var c=cfg();$("syncBar").hidden=!(c.url&&c.key)}
+  function showBar(){
+    var c=cfg(),on=!!(c.url&&c.key);
+    $("syncBar").hidden=!on;$("exJson").hidden=$("imJson").hidden=on;
+    $("storeHint").innerHTML=on
+      ?'Daftar tersimpan di <b>Google Sheet</b> panitia dan tersinkron ke semua perangkat yang terhubung, jadi tidak perlu dipindah manual. Gunakan <b>Ekspor CSV</b> untuk salinan atau arsip.'
+      :'Daftar disimpan di browser perangkat ini saja. Hubungkan ke <b>Google Sheets</b> (panel Sinkron di atas) agar daftar sama di semua perangkat. Tanpa itu, gunakan <b>Backup JSON</b> secara berkala.';
+  }
   function matchKeys(g){var k={};k[nk(g.nama)]=1;if(g.alias)k[nk(g.alias)]=1;return k}
   function applyRsvp(g,r){
     g.rsvpAt=r.waktu;g.status=r.hadir==="Ya"?"hadir":"tidak";
@@ -362,7 +369,7 @@ textarea{min-height:110px;resize:vertical}
       if(!r)return;
       if(g.rsvpAt!==r.waktu){applyRsvp(g,r);n++}else if(r.ucap&&g.ucap!==r.ucap){g.ucap=r.ucap}
     });
-    if(n)save();
+    if(n)persist();
     return n;
   }
   function orphans(){
@@ -405,38 +412,103 @@ textarea{min-height:110px;resize:vertical}
     if(confirm("Cocokkan RSVP \""+r.nama+"\" dengan tamu \""+g.nama+"\"?")){g.alias=r.nama;applyRsvp(g,r);save();render();toast("RSVP dicocokkan dengan "+g.nama)}
     else s.value="";
   });
-  function sync(manual){
+  /* ---- sinkron daftar tamu dua arah ----
+     base = gambaran daftar di Sheet saat sinkron terakhir. Selisih antara daftar lokal dan base = perubahan yang belum terkirim. */
+  var BKEY="ppgkpi_base_v1", base=null, syncing=false, queued=false, tSync=null;
+  function sig(g){return JSON.stringify([g.nama,g.wa||"",g.jml,g.kat||"",g.status,g.ucap||"",g.rsvpAt||"",g.alias||""])}
+  function pack(g){return{id:g.id,nama:g.nama,wa:g.wa||"",jml:g.jml,kat:g.kat||"",status:g.status,ucap:g.ucap||"",rsvpAt:g.rsvpAt||"",alias:g.alias||""}}
+  function fromServer(x){return{id:x.id,nama:x.nama,wa:x.wa||"",jml:Math.max(1,parseInt(x.jml,10)||1),kat:x.kat||"",status:STATUS[x.status]?x.status:"belum",ucap:x.ucap||"",rsvpAt:x.rsvpAt||"",alias:x.alias||""}}
+  function born(id){return parseInt(String(id).slice(0,-4),36)||0}
+  function loadBase(url){try{var b=JSON.parse(localStorage.getItem(BKEY)||"null");if(b&&b.u===url&&b.m)return b.m}catch(e){}return null}
+  function saveBase(url){try{localStorage.setItem(BKEY,JSON.stringify({u:url,m:base}))}catch(e){}}
+  function pending(){
+    var ch=[];
+    guests.forEach(function(g){if(base[g.id]!==sig(g))ch.push({op:"up",id:g.id,g:pack(g)})});
+    for(var id in base)if(!find(id))ch.push({op:"del",id:id});
+    return ch;
+  }
+  function post(c,body){
+    return fetch(c.url,{method:"POST",body:JSON.stringify(body)}).then(function(r){return r.json()}).then(function(r){
+      if(!r||!r.ok)throw new Error(r&&r.error==="unauthorized"?"Kode admin salah.":((r&&r.error)||"Respons tidak dikenali."));
+      return r;
+    });
+  }
+  /* pertama kali terhubung: tamu lokal yang namanya sudah ada di Sheet memakai data Sheet (tidak dobel) */
+  function adoptByName(list){
+    var byName={},seen={};
+    list.forEach(function(x){if(!x.del&&!byName[nk(x.nama)])byName[nk(x.nama)]=x});
+    guests=guests.map(function(g){var x=byName[nk(g.nama)];return x?fromServer(x):g})
+      .filter(function(g){if(seen[g.id])return false;seen[g.id]=1;return true});
+    list.forEach(function(x){if(!x.del&&!seen[x.id]){guests.push(fromServer(x));seen[x.id]=1}});   /* tamu yang hanya ada di Sheet ikut diambil */
+    guests.sort(function(a,b){return born(b.id)-born(a.id)});
+    base={};list.forEach(function(x){if(!x.del)base[x.id]=sig(fromServer(x))});
+  }
+  /* terapkan keadaan Sheet ke daftar lokal, tanpa menimpa ubahan yang terjadi selama permintaan berjalan */
+  function reconcile(list,snap){
+    var byId={},out=[],have={};
+    list.forEach(function(x){byId[x.id]=x});
+    guests.forEach(function(g){
+      var x=byId[g.id],edited=snap[g.id]===undefined||snap[g.id]!==sig(g);
+      have[g.id]=1;
+      if(x&&!x.del)out.push(edited?g:fromServer(x));
+      else if(x&&x.del){if(edited)out.push(g)}
+      else out.push(g);
+    });
+    list.forEach(function(x){
+      if(x.del||have[x.id]||snap[x.id]!==undefined)return;      /* snap ada = dihapus lokal saat permintaan berjalan */
+      out.push(fromServer(x));
+    });
+    out.sort(function(a,b){return born(b.id)-born(a.id)});
+    guests=out;
+    base={};list.forEach(function(x){if(!x.del)base[x.id]=sig(fromServer(x))});
+  }
+  function schedSync(){var c=cfg();clearTimeout(tSync);if(c.url&&c.key)tSync=setTimeout(function(){sync(false)},1500)}
+  function sync(manual,attempt){
+    attempt=attempt||0;
     var c=cfg();
     if(!c.url||!c.key){if(manual)toast("Isi alamat Web App dan kode admin dulu");return Promise.resolve()}
     if(!/^https:\/\/script\.google\.com\/.+\/exec$/.test(c.url)){setInfo("Alamat Web App tidak valid (harus berakhiran /exec).");if(manual)toast("Alamat Web App tidak valid");return Promise.resolve()}
-    $("syncQuick").disabled=$("syncBtn").disabled=true;setInfo("Mengambil data RSVP…");
-    return fetch(c.url,{method:"POST",body:JSON.stringify({action:"list",key:c.key})})
-      .then(function(r){return r.json()})
-      .then(function(r){
-        if(!r||!r.ok)throw new Error(r&&r.error==="unauthorized"?"Kode admin salah.":((r&&r.error)||"Respons tidak dikenali."));
-        rsvp=Array.isArray(r.rows)?r.rows:[];
+    if(syncing){queued=true;return Promise.resolve()}
+    syncing=true;$("syncQuick").disabled=$("syncBtn").disabled=true;setInfo("Menyinkronkan…");
+    var prep=Promise.resolve();
+    if(!base)base=loadBase(c.url);
+    if(!base)prep=post(c,{action:"sync",key:c.key,changes:[]}).then(function(r){adoptByName(r.tamu);persist();saveBase(c.url)});
+    var again=false;
+    return prep.then(function(){
+      var snap={};guests.forEach(function(g){snap[g.id]=sig(g)});
+      var ch=pending();
+      return post(c,{action:"sync",key:c.key,changes:ch}).then(function(r){
+        rsvp=r.rows||[];
+        reconcile(r.tamu||[],snap);
+        var n=apply();persist();saveBase(c.url);
         var t=fmtTime(new Date());
         try{localStorage.setItem(RKEY,JSON.stringify({t:t,rows:rsvp}))}catch(e){}
-        var n=apply();render();
-        setInfo("RSVP diperbarui "+t+" · "+rsvp.length+" jawaban");
-        if(manual||n)toast(n?(n+" status tamu diperbarui dari RSVP"):"RSVP sudah yang terbaru");
-      })
-      .catch(function(e){
-        setInfo("Gagal: "+(e instanceof TypeError?"tidak bisa terhubung ke Google Sheet. Periksa alamat Web App dan koneksi internet.":e.message));
-        if(manual)toast("Gagal mengambil RSVP");
-      })
-      .then(function(){$("syncQuick").disabled=$("syncBtn").disabled=false});
+        render();showBar();
+        setInfo("Tersinkron "+t+" · "+guests.length+" tamu · "+rsvp.length+" RSVP");
+        if(manual||n)toast(n?(n+" status tamu diperbarui dari RSVP"):"Sudah yang terbaru");
+        again=pending().length>0&&attempt<2;
+      });
+    }).catch(function(e){
+      var np=base?pending().length:0;
+      setInfo("Gagal: "+(e instanceof TypeError?"tidak bisa terhubung ke Google Sheet. Periksa alamat Web App dan koneksi internet.":e.message)+(np?(" · "+np+" perubahan menunggu dikirim"):""));
+      if(manual)toast("Gagal sinkron");
+    }).then(function(){
+      syncing=false;$("syncQuick").disabled=$("syncBtn").disabled=false;
+      if(again)return sync(false,attempt+1);
+      if(queued){queued=false;schedSync()}
+    });
   }
-  $("syncBtn").onclick=function(){saveCfg({url:$("s-url").value.trim(),key:$("s-key").value});showBar();sync(true)};
+  window.addEventListener("online",function(){sync(false)});
+  $("syncBtn").onclick=function(){saveCfg({url:$("s-url").value.trim(),key:$("s-key").value});base=null;showBar();sync(true)};
   $("syncQuick").onclick=function(){sync(true)};
   $("syncOff").onclick=function(){
-    if(!confirm("Putuskan sinkron? Alamat dan kode admin dihapus dari browser ini (data tamu tidak berubah)."))return;
-    try{localStorage.removeItem(SKEY);localStorage.removeItem(RKEY)}catch(e){}
-    rsvp=[];$("s-url").value=DEFAULT_SHEET_URL;$("s-key").value="";showBar();setInfo("");render();toast("Sinkron diputus");
+    if(!confirm("Putuskan sinkron? Alamat dan kode admin dihapus dari browser ini. Daftar tamu di browser tetap ada, tetapi tidak lagi tersinkron dengan Sheet."))return;
+    try{localStorage.removeItem(SKEY);localStorage.removeItem(RKEY);localStorage.removeItem(BKEY)}catch(e){}
+    base=null;rsvp=[];$("s-url").value=DEFAULT_SHEET_URL;$("s-key").value="";showBar();setInfo("");render();toast("Sinkron diputus");
   };
   function initSync(){
     var c=cfg();$("s-url").value=c.url;$("s-key").value=c.key;
-    try{var cache=JSON.parse(localStorage.getItem(RKEY)||"null");if(cache&&Array.isArray(cache.rows)){rsvp=cache.rows;setInfo("RSVP terakhir diperbarui "+cache.t+" · "+rsvp.length+" jawaban")}}catch(e){}
+    try{var cache=JSON.parse(localStorage.getItem(RKEY)||"null");if(cache&&Array.isArray(cache.rows)){rsvp=cache.rows;setInfo("Terakhir tersinkron "+cache.t+" · "+rsvp.length+" RSVP")}}catch(e){}
     showBar();
     if(c.url&&c.key)sync(false);else $("syncPanel").open=true;
   }
