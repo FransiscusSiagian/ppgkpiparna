@@ -19,12 +19,12 @@ html{scroll-behavior:smooth}
 body{font-family:var(--sans);color:var(--cream);background:#04100b;line-height:1.6}
 body.locked{overflow:hidden;height:100vh}
 .stage{max-width:520px;margin:0 auto;position:relative;background:linear-gradient(180deg,var(--g2),var(--g1) 40%,var(--g2));box-shadow:0 0 80px rgba(0,0,0,.6);min-height:100vh;overflow:hidden}
-.snow{position:fixed;inset:0;pointer-events:none;z-index:50;overflow:hidden}
+.snow{position:absolute;inset:0;pointer-events:none;z-index:0;overflow:hidden}
 .snow i{position:absolute;top:-14px;font-style:normal;color:#fff;text-shadow:0 0 4px rgba(0,0,0,.4);animation:fall linear infinite}
 @keyframes fall{to{transform:translate3d(var(--d,30px),110vh,0) rotate(240deg)}}
 
 /* shared */
-section{padding:72px 28px;text-align:center;position:relative}
+section{padding:72px 28px;text-align:center;position:relative;z-index:1}
 .script{font-family:var(--script);color:var(--gold);font-size:2.6rem;line-height:1.1}
 .serif{font-family:var(--serif)}
 .eyebrow{font-size:.74rem;letter-spacing:.3em;text-transform:uppercase;color:var(--gold)}
@@ -36,7 +36,7 @@ p{color:rgba(251,246,233,.85)}
 .frame{position:absolute;inset:14px;border:1px solid rgba(233,196,106,.55);pointer-events:none}
 .frame::before,.frame::after{content:"✦";position:absolute;color:var(--gold);font-size:.9rem;background:var(--g1);padding:0 6px;left:50%;transform:translateX(-50%)}
 .frame::before{top:-.7em}.frame::after{bottom:-.7em}
-.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 26px;border-radius:999px;border:1px solid var(--gold);color:var(--g1);background:linear-gradient(120deg,var(--gold2),var(--gold));font-[...]
+.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 26px;border-radius:999px;border:1px solid var(--gold);color:var(--g1);background:linear-gradient(120deg,var(--gold2),var(--gold));font-family:var(--sans);font-size:.96rem;font-weight:600;cursor:pointer;transition:transform .2s ease,box-shadow .2s ease}
 .btn:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(233,196,106,.3)}
 .btn.ghost{background:none;color:var(--gold)}
 .cal{display:flex;flex-direction:column;align-items:center;gap:12px;margin:26px auto 0}
@@ -49,7 +49,7 @@ p{color:rgba(251,246,233,.85)}
 /* cover */
 #cover{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
   background:radial-gradient(ellipse at 50% 0%,rgba(233,196,106,.18),transparent 60%),linear-gradient(160deg,var(--g1),var(--g2) 55%,var(--g3));
-  transition:transform 1s cubic-bezier(.7,0,.2,1),opacity .6s;position:relative;z-index:60}
+  transition:transform 1s cubic-bezier(.7,0,.2,1),opacity .6s;position:relative;z-index:1}
 #cover img{width:96px;filter:drop-shadow(0 0 18px rgba(233,196,106,.5));margin-bottom:18px}
 #cover h1{font-family:var(--serif);font-weight:600;font-size:2.2rem;line-height:1.15;margin:6px 0 4px}
 #cover .script{font-size:3.3rem;margin-top:2px}
@@ -119,15 +119,13 @@ body.opened .music.ok{display:grid}
 </style>
 </head>
 <body class="locked">
-<div class="snow" id="snow" aria-hidden="true"></div>
-<audio id="bgm" src="files/bgmusik.mp3" loop preload="auto"></audio>
-<button class="music" id="musicBtn" type="button" aria-label="Putar atau jeda musik"><span>♪</span></button>
 <div class="stage closed" id="stage">
+<div class="snow" id="snow" aria-hidden="true"></div>
 
 <!-- COVER -->
 <div id="cover">
   <div class="frame"></div>
-  <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAeQAAAHbCAYAAAAagumBAAABHNCSVQICAgIfAhkiAAAChZpQ0NQaWNjAABIibVWeTyUaxt+3vedfbHNkN3Yt0aWMMi+k8hOmzEzGMtgzKDSJqlwIkm2EjkVOnRakNMiLdqO0qaizsgRqt[...]
+  <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAeQAAAHbCAYAAAAagumBAAAABHNCSVQICAgIfAhkiAAAChZpQ0NQaWNjAABIibVWeTyUaxt+3vedfbHNkN3Yt0aWMMi+k8hOmzEzGMtgzKDSJqlwIkm2EjkVOnRakNMiLdqO0qaizsgRqt[...]
   <p class="eyebrow">The Christmas Invitation</p>
   <h1>Natal<br>Pemuda-Pemudi</h1>
   <div class="script">2026</div>
@@ -274,8 +272,6 @@ body.opened .music.ok{display:grid}
       "END:VEVENT","END:VCALENDAR"]);
     return L.join("\r\n");
   }
-  /* Tombol pintar: iPhone/iPad -> langsung muncul layar "Tambahkan ke Kalender";
-     Android -> langsung Google Calendar; laptop -> unduh file .ics */
   var icsBtn=$("calIcs");
   if(icsBtn){icsBtn.onclick=function(){
     var ua=navigator.userAgent||"",ios=/iPhone|iPad|iPod/.test(ua)||(/Macintosh/.test(ua)&&navigator.maxTouchPoints>1);
@@ -285,7 +281,6 @@ body.opened .music.ok{display:grid}
     a.download="Natal-Pemuda-Pemudi-2026.ics";document.body.appendChild(a);a.click();
     setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},800);
   }}
-  /* countdown ke 19 Des 2026 00:00 WIB (UTC+7) */
   var target=Date.UTC(2026,11,18,17,0,0);
   function tick(){
     var d=target-Date.now();
@@ -296,8 +291,6 @@ body.opened .music.ok{display:grid}
     $("cd-s").textContent=String(Math.floor(d%6e4/1e3)).padStart(2,"0");
   }
   tick();setInterval(tick,1000);
-  /* RSVP -> Google Sheets (Apps Script), WhatsApp sebagai cadangan.
-     Tempel alamat Web App di bawah. Jika dikosongkan, RSVP dikirim lewat WhatsApp saja. */
   var SHEET_URL="";
   var rsvpBtn=$("rsvpSend"),rsvpWa=$("rsvpWa"),rsvpMsg=$("rsvpMsg"),sending=false;
   function waRsvp(){
@@ -327,11 +320,9 @@ body.opened .music.ok{display:grid}
       .catch(function(){say("Maaf, RSVP belum terkirim. Silakan coba lagi, atau kirim lewat WhatsApp.",false)})
       .then(function(){clearTimeout(to);sending=false;rsvpBtn.disabled=false;rsvpBtn.textContent="Kirim RSVP"});
   };
-  /* tata acara: nonaktif jika PDF belum ada */
   var tb=$("tataBtn");
   if(tb&&window.fetch)fetch(tb.getAttribute("href"),{method:"HEAD"}).then(function(r){
     if(!r.ok){tb.classList.add("is-disabled");tb.removeAttribute("download");tb.textContent="Segera hadir"}}).catch(function(){});
-  /* salju */
   if(!(window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches)){
     var box=$("snow"),g=["❄","❅","❆"],c=innerWidth<700?16:28;
     if(box){
