@@ -206,6 +206,7 @@ details.acc:last-of-type{border-bottom:1px solid var(--line)}
   $("stats").innerHTML=FL.map(function(f){return '<button type="button" class="chip" data-f="'+f[0]+'" aria-pressed="false">'+f[1]+' <b>0</b></button>'}).join("");
   $("stats").addEventListener("click",function(e){var b=e.target.closest("[data-f]");if(b){curF=b.getAttribute("data-f");render()}});
   function menu(g){
+    if(role!=="admin")return "";
     return '<details class="more"><summary class="btn">Lainnya</summary><div class="menu">'+
       '<button class="mi" data-a="view">Pratinjau undangan</button><button class="mi" data-a="edit">Edit tamu</button><div class="ml">Ubah status</div>'+
       Object.keys(STATUS).map(function(k){return '<button class="mi" data-a="st" data-v="'+k+'">'+STATUS[k]+(k===g.status?' (sekarang)':'')+'</button>'}).join("")+
@@ -246,6 +247,7 @@ details.acc:last-of-type{border-bottom:1px solid var(--line)}
     if(a==="clearq"){$("q").value="";render();return}
     if(a==="bulk"){$("bulkBox").open=true;$("bulk").focus();return}
     if(!g)return;
+    if(role!=="admin"&&(a==="view"||a==="edit"||a==="st"||a==="del"))return;
     if(a==="wa"){
       window.open("https://wa.me/"+(g.wa||"")+"?text="+encodeURIComponent(message(g)),"_blank","noopener");
       if(g.status==="belum"){g.status="terkirim";save();render();toast("Ditandai sudah dikirim. Ubah lewat menu Lainnya bila belum terkirim.")}
