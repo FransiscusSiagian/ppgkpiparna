@@ -217,8 +217,7 @@ body.opened .music.ok{display:grid}
     <label>Jumlah orang<input id="f-jml" type="number" min="1" step="1" value="1" required></label>
     <label>Ucapan &amp; doa<textarea id="f-ucap" maxlength="300" placeholder="Tulis ucapan Natal Anda…"></textarea></label>
     <div aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden"><label>Jangan diisi<input id="f-web" tabindex="-1" autocomplete="off"></label></div>
-    <button class="btn" id="rsvpSend" type="submit" style="justify-content:center">Kirim via WhatsApp</button>
-    <button class="btn ghost" id="rsvpWa" type="button" style="justify-content:center" hidden>Kirim via WhatsApp</button>
+    <button class="btn" id="rsvpSend" type="submit" style="justify-content:center">Kirim RSVP via WhatsApp</button>
     <p id="rsvpMsg" role="status" aria-live="polite" style="font-size:.9rem;min-height:1.4em;margin-top:6px"></p>
   </form>
 </section>
@@ -314,34 +313,36 @@ body.opened .music.ok{display:grid}
   tick();setInterval(tick,1000);
   /* RSVP -> Google Sheets (Apps Script), WhatsApp sebagai cadangan.
      Tempel alamat Web App di bawah. Jika dikosongkan, RSVP dikirim lewat WhatsApp saja. */
-  var SHEET_URL="";
-  var rsvpBtn=$("rsvpSend"),rsvpWa=$("rsvpWa"),rsvpMsg=$("rsvpMsg"),sending=false;
-  function waRsvp(){
+  var SB_URL="https://ygiwoszpjuoubkpnsogz.supabase.co",SB_KEY="sb_publishable_yxVs9u7kPaMqwaz1lr8pzA_h3Ixnb2Z";   /* isi sama seperti di tamu.html; bila kosong, RSVP lewat WhatsApp saja */
+  function hdr(){var h={"Content-Type":"application/json",apikey:SB_KEY};if(/^eyJ/.test(SB_KEY))h.Authorization="Bearer "+SB_KEY;return h}
+  var SHEET_URL=SB_URL&&SB_KEY;
+  var rsvpBtn=$("rsvpSend"),rsvpMsg=$("rsvpMsg"),sending=false;
+  function waLink(){
     var t="Shalom, saya "+$("f-nama").value.trim()+".\nKonfirmasi Natal Pemuda-Pemudi 2026 (19 Des 2026): "+$("f-hadir").value+
       " — jumlah: "+$("f-jml").value+" orang."+($("f-ucap").value.trim()?"\nUcapan: "+$("f-ucap").value.trim():"");
-    window.open("https://wa.me/"+WA+"?text="+encodeURIComponent(t),"_blank","noopener");
+    return "https://wa.me/"+WA+"?text="+encodeURIComponent(t);
   }
   function say(t,ok){rsvpMsg.textContent=t;rsvpMsg.className=ok===false?"err":""}
-  if(SHEET_URL){rsvpBtn.textContent="Kirim RSVP";rsvpWa.hidden=false}
-  rsvpWa.onclick=function(){if(!$("f-nama").value.trim()){say("Mohon isi nama Anda dulu.",false);$("f-nama").focus();return}waRsvp()};
   $("rsvpForm").onsubmit=function(e){
     e.preventDefault();
-    if(!SHEET_URL){waRsvp();return}
     if(sending)return;
     var nama=$("f-nama").value.trim().replace(/\s+/g," ");
     var jml=parseInt($("f-jml").value,10);
     if(!nama){say("Mohon isi nama Anda.",false);return}
     if(!(jml>=1&&jml<=50)){say("Jumlah orang harus antara 1 dan 50.",false);return}
+    var url=waLink(),win=window.open("","_blank");   /* dibuka sekarang agar tidak diblokir browser, diarahkan ke WhatsApp setelah RSVP tercatat */
+    function goWa(){if(win&&!win.closed)win.location.href=url;else window.location.href=url}
+    if(!SHEET_URL){goWa();return}
     sending=true;rsvpBtn.disabled=true;rsvpBtn.textContent="Mengirim…";say("");
-    var ctl=window.AbortController?new AbortController():null,to=setTimeout(function(){if(ctl)ctl.abort()},20000);
-    fetch(SHEET_URL,{method:"POST",body:JSON.stringify({nama:nama,hadir:$("f-hadir").selectedIndex===0?"Ya":"Tidak",jml:jml,ucap:$("f-ucap").value.trim(),web:$("f-web").value}),signal:ctl?ctl.signal:undefined})
+    var ctl=window.AbortController?new AbortController():null,to=setTimeout(function(){if(ctl)ctl.abort()},15000);
+    fetch(SB_URL+"/rest/v1/rpc/submit_rsvp",{method:"POST",headers:hdr(),body:JSON.stringify({p_nama:nama,p_hadir:$("f-hadir").selectedIndex===0?"Ya":"Tidak",p_jml:jml,p_ucap:$("f-ucap").value.trim(),p_web:$("f-web").value}),signal:ctl?ctl.signal:undefined})
       .then(function(r){return r.json()})
       .then(function(r){
         if(!r||!r.ok)throw new Error(r&&r.error||"gagal");
-        say("Terima kasih, "+nama+"! Konfirmasi Anda sudah kami terima. Anda bisa mengirim ulang bila ingin mengubahnya.",true);
+        say("Terima kasih, "+nama+"! RSVP Anda sudah tercatat. Di WhatsApp, tekan Kirim untuk menyelesaikan. Anda bisa mengirim ulang bila ingin mengubahnya.",true);
       })
-      .catch(function(){say("Maaf, RSVP belum terkirim. Silakan coba lagi, atau kirim lewat WhatsApp.",false)})
-      .then(function(){clearTimeout(to);sending=false;rsvpBtn.disabled=false;rsvpBtn.textContent="Kirim RSVP"});
+      .catch(function(){say("RSVP belum tercatat otomatis, tetapi pesan WhatsApp sudah disiapkan. Mohon tekan Kirim di WhatsApp.",false)})
+      .then(function(){clearTimeout(to);goWa();sending=false;rsvpBtn.disabled=false;rsvpBtn.textContent="Kirim RSVP via WhatsApp"});
   };
   /* tata acara: nonaktif jika PDF belum ada */
   var tb=$("tataBtn");
