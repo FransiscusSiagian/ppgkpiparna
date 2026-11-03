@@ -283,6 +283,7 @@
   function show(i) {
     idx = (i + list.length) % list.length;
     var cur = list[idx], full = cur.getAttribute("data-full"), mine = ++token;
+    resetZoom();
     big.alt = cur.alt;
     big.src = cur.currentSrc || cur.src; /* thumbnail dulu, langsung tampil */
     if (!full) { lb.classList.remove("loading"); return; }
@@ -296,7 +297,7 @@
     pre.onerror = function () { if (mine === token) lb.classList.remove("loading"); };
     pre.src = full;
   }
-  function close() { token++; lb.classList.remove("open", "loading"); }
+  function close() { token++; resetZoom(); lb.classList.remove("open", "loading"); }
   lb.querySelector(".lb-x").addEventListener("click", close);
   lb.querySelector(".lb-p").addEventListener("click", function (e) { e.stopPropagation(); show(idx - 1); });
   lb.querySelector(".lb-n").addEventListener("click", function (e) { e.stopPropagation(); show(idx + 1); });
@@ -306,6 +307,117 @@
     if (e.key === "Escape") close();
     if (e.key === "ArrowLeft") show(idx - 1);
     if (e.key === "ArrowRight") show(idx + 1);
+  });
+
+  /* ---------- Zoom: roda mouse / cubit dua jari / ketuk dua kali / tombol, geser untuk menggeser foto ---------- */
+  var MAXZ = 5, zs = 1, tx = 0, ty = 0, pts = {}, nPts = 0, prevD = 0, prevMx = 0, prevMy = 0;
+  var tapT = 0, tapX = 0, tapY = 0, down = null;
+  var zctl = document.createElement("div");
+  zctl.className = "lb-z";
+  zctl.innerHTML = '<button type="button" class="lb-zo" aria-label="Perkecil">\u2212</button><button type="button" class="lb-zr" aria-label="Kembalikan ukuran">100%</button><button type="button" class="lb-zi" aria-label="Perbesar">+</button>';
+  lb.appendChild(zctl);
+  var bZo = zctl.querySelector(".lb-zo"), bZr = zctl.querySelector(".lb-zr"), bZi = zctl.querySelector(".lb-zi");
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function applyZoom() {
+    var maxX = Math.max(0, (big.offsetWidth * zs - lb.clientWidth) / 2);
+    var maxY = Math.max(0, (big.offsetHeight * zs - lb.clientHeight) / 2);
+    tx = Math.max(-maxX, Math.min(maxX, tx));
+    ty = Math.max(-maxY, Math.min(maxY, ty));
+    big.style.transform = zs === 1 ? "" : "translate(" + tx + "px," + ty + "px) scale(" + zs + ")";
+    lb.classList.toggle("zoomed", zs > 1.001);
+    bZr.textContent = Math.round(zs * 100) + "%";
+    bZo.disabled = zs <= 1.001;
+    bZi.disabled = zs >= MAXZ - 0.001;
+  }
+  function resetZoom() { zs = 1; tx = ty = 0; pts = {}; nPts = 0; down = null; lb.classList.remove("panning"); applyZoom(); }
+  function anim() {
+    if (reduce) return;
+    lb.classList.add("anim");
+    clearTimeout(anim.t);
+    anim.t = setTimeout(function () { lb.classList.remove("anim"); }, 220);
+  }
+  /* cx, cy: titik fokus relatif terhadap pusat layar */
+  function zoomAt(ns, cx, cy) {
+    ns = Math.max(1, Math.min(MAXZ, ns));
+    if (ns === zs) return;
+    if (ns <= 1.001) { zs = 1; tx = ty = 0; }
+    else { tx = cx - (cx - tx) * ns / zs; ty = cy - (cy - ty) * ns / zs; zs = ns; }
+    applyZoom();
+  }
+  function rel(x, y) {
+    var r = lb.getBoundingClientRect();
+    return { x: x - (r.left + r.width / 2), y: y - (r.top + r.height / 2) };
+  }
+  bZi.addEventListener("click", function () { anim(); zoomAt(zs * 1.6, 0, 0); });
+  bZo.addEventListener("click", function () { anim(); zoomAt(zs / 1.6, 0, 0); });
+  bZr.addEventListener("click", function () { anim(); zoomAt(1, 0, 0); });
+
+  lb.addEventListener("wheel", function (e) {
+    e.preventDefault();
+    var c = rel(e.clientX, e.clientY);
+    zoomAt(zs * Math.exp(-e.deltaY * (e.ctrlKey ? 0.01 : 0.0018)), c.x, c.y);
+  }, { passive: false });
+
+  function dist() {
+    var k = Object.keys(pts), a = pts[k[0]], b = pts[k[1]];
+    return { d: Math.hypot(a.x - b.x, a.y - b.y), x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+  }
+  big.addEventListener("pointerdown", function (e) {
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    try { big.setPointerCapture(e.pointerId); } catch (err) {}
+    pts[e.pointerId] = { x: e.clientX, y: e.clientY };
+    nPts = Object.keys(pts).length;
+    if (nPts === 1) down = { x: e.clientX, y: e.clientY, t: Date.now(), moved: false };
+    else { down = null; var p = dist(); prevD = p.d; prevMx = p.x; prevMy = p.y; }
+    if (zs > 1.001) lb.classList.add("panning");
+  });
+  big.addEventListener("pointermove", function (e) {
+    var p0 = pts[e.pointerId];
+    if (!p0) return;
+    var dx = e.clientX - p0.x, dy = e.clientY - p0.y;
+    p0.x = e.clientX; p0.y = e.clientY;
+    if (nPts >= 2) {
+      var p = dist(), c = rel(p.x, p.y);
+      if (prevD > 0) zoomAt(zs * p.d / prevD, c.x, c.y);
+      tx += p.x - prevMx; ty += p.y - prevMy;
+      prevD = p.d; prevMx = p.x; prevMy = p.y;
+      applyZoom();
+    } else if (nPts === 1) {
+      if (down && Math.hypot(e.clientX - down.x, e.clientY - down.y) > 8) down.moved = true;
+      if (zs > 1.001) { tx += dx; ty += dy; applyZoom(); }
+    }
+  });
+  function endPointer(e) {
+    if (!pts[e.pointerId]) return;
+    delete pts[e.pointerId];
+    nPts = Object.keys(pts).length;
+    lb.classList.remove("panning");
+    if (nPts === 1) { var p = pts[Object.keys(pts)[0]]; down = null; if (zs > 1.001) lb.classList.add("panning"); return; }
+    if (nPts > 0 || !down || e.type === "pointercancel") { down = null; return; }
+    var d = down, ddx = e.clientX - d.x, ddy = e.clientY - d.y, now = Date.now();
+    down = null;
+    if (d.moved) { /* geser ke samping pada ukuran normal = ganti foto */
+      if (zs <= 1.001 && Math.abs(ddx) > 60 && Math.abs(ddx) > 1.5 * Math.abs(ddy)) show(idx + (ddx < 0 ? 1 : -1));
+      return;
+    }
+    if (now - d.t > 350) return;
+    if (now - tapT < 320 && Math.hypot(e.clientX - tapX, e.clientY - tapY) < 30) { /* ketuk dua kali */
+      tapT = 0;
+      var c = rel(e.clientX, e.clientY);
+      anim();
+      if (zs > 1.001) zoomAt(1, 0, 0); else zoomAt(2.5, c.x, c.y);
+    } else { tapT = now; tapX = e.clientX; tapY = e.clientY; }
+  }
+  big.addEventListener("pointerup", endPointer);
+  big.addEventListener("pointercancel", endPointer);
+  big.addEventListener("dragstart", function (e) { e.preventDefault(); });
+  window.addEventListener("resize", function () { if (lb.classList.contains("open")) applyZoom(); });
+  document.addEventListener("keydown", function (e) {
+    if (!lb.classList.contains("open") || e.ctrlKey || e.metaKey) return;
+    if (e.key === "+" || e.key === "=") { anim(); zoomAt(zs * 1.4, 0, 0); }
+    else if (e.key === "-" || e.key === "_") { anim(); zoomAt(zs / 1.4, 0, 0); }
+    else if (e.key === "0") { anim(); zoomAt(1, 0, 0); }
   });
 
   /* ---------- Satu kategori ---------- */
