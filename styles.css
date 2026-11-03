@@ -294,21 +294,34 @@ h2{font-size:clamp(2.2rem,5vw,3.6rem)}
 .welcome-wrap.has-photo{display:grid;max-width:none;grid-template-columns:minmax(0,380px) 1fr}
 @media (max-width:900px){.welcome-wrap.has-photo{grid-template-columns:1fr}.nav-links{background:var(--dark)}}
 
-/* ===== Revisi 5: navbar mengambang, tersembunyi di puncak halaman dan muncul saat di-scroll ===== */
-html{scroll-padding-top:96px}
-.nav{position:fixed;top:12px;left:12px;right:12px;max-width:1120px;margin:0 auto;z-index:60;background:var(--foot);border:1px solid rgba(255,255,255,.16);border-radius:var(--r2);box-shadow:0 10px 28px rgba(2,38,28,.28);transform:translateY(calc(-100% - 24px));opacity:0;pointer-events:none;transition:transform .35s cubic-bezier(.2,.7,.2,1),opacity .25s ease}
-.nav.scrolled,.nav:focus-within{transform:none;opacity:1;pointer-events:auto;border-color:rgba(255,255,255,.16)}
-.nav-inner{min-height:60px;padding:0 10px 0 18px}
-.nav-links a{border-radius:var(--r1)}
-.nav-links .nav-cta{margin-left:6px}
+/* ===== Revisi 10: navbar solid dan datar =====
+   Tanpa blur, tanpa border tembus pandang, tanpa bayangan lembut. Satu bar penuh selebar layar,
+   satu garis emas tipis di bawah, penanda halaman aktif berupa garis emas di tepi bawah bar.
+   Rubi hanya dipakai di tombol ajakan bergabung. */
+html{scroll-padding-top:72px}
+.nav{position:fixed;top:0;left:0;right:0;max-width:none;margin:0;z-index:60;background:var(--dark);border:0;border-bottom:1px solid rgba(230,201,135,.38);border-radius:0;box-shadow:none;transform:translateY(-100%);opacity:1;pointer-events:none;transition:transform .3s cubic-bezier(.2,.7,.2,1)}
+.nav.scrolled,.nav:focus-within{transform:none;pointer-events:auto;border-color:rgba(230,201,135,.38)}
+.nav-inner{max-width:1160px;min-height:64px;padding:0 24px;gap:24px}
+.nav :focus-visible{outline-color:var(--soft)}
+.brand-text b{letter-spacing:0}
+.nav-links{gap:2px;align-self:stretch}
+.nav-links a{position:relative;display:flex;align-items:center;padding:0 14px;border:0;border-radius:0;font-size:.92rem;font-weight:500;color:rgba(250,246,236,.72);transition:color .2s}
+.nav-links a:hover{color:var(--on-dark)}
+.nav-links a:not(.nav-cta)::after{content:"";position:absolute;left:14px;right:14px;bottom:0;height:3px;background:var(--soft);transform:scaleX(0);transform-origin:left;transition:transform .25s ease}
+.nav-links a:not(.nav-cta):hover::after{transform:scaleX(.4)}
+.nav-links a.active:not(.nav-cta){color:var(--on-dark);border:0}
+.nav-links a.active:not(.nav-cta)::after{transform:scaleX(1)}
+.nav-links .nav-cta{align-self:center;height:42px;margin-left:14px;padding:0 20px;background:var(--red);color:#fff;border-radius:var(--r1);font-weight:600}
+.nav-links .nav-cta:hover{background:#9c1f30;color:#fff}
 @media (max-width:900px){
-  .nav{top:8px;left:8px;right:8px}
-  .nav-inner{min-height:56px;padding:0 8px 0 14px}
-  .nav-links{top:calc(100% + 8px);left:0;right:0;padding:6px 20px 18px;background:var(--foot);border:1px solid rgba(255,255,255,.16);border-radius:var(--r2);box-shadow:0 10px 28px rgba(2,38,28,.22)}
-  .nav-links a{border-radius:0}
-  .nav-links .nav-cta{margin:16px 0 0;border-radius:var(--r1)}
+  .nav-inner{min-height:58px;padding:0 8px 0 18px}
+  .nav-links{top:100%;left:0;right:0;align-self:auto;padding:4px 18px 20px;background:var(--dark);border:0;border-bottom:1px solid rgba(230,201,135,.38);border-radius:0;box-shadow:none}
+  .nav-links a{padding:15px 0;border-radius:0;border-bottom:1px solid var(--line-d);color:rgba(250,246,236,.8)}
+  .nav-links a:not(.nav-cta)::after{display:none}
+  .nav-links a.active:not(.nav-cta){color:var(--soft)}
+  .nav-links .nav-cta{align-self:stretch;justify-content:center;height:auto;margin:18px 0 0;padding:14px 20px;border-bottom:0;border-radius:var(--r1)}
 }
-@media (prefers-reduced-motion:reduce){.nav{transition:opacity .15s ease}}
+@media (prefers-reduced-motion:reduce){.nav{transition:none}.nav-links a::after{transition:none}}
 
 /* ===== Revisi 6: hanya logo di hero yang berputar 3D (bingkai putih tetap diam); seret / ketuk / keyboard ===== */
 .coin-stage{position:relative;width:min(100%,400px);aspect-ratio:1}
