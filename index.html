@@ -423,6 +423,24 @@
 
 <script src="script.js?v=natal2"></script>
 
+<script>
+/* Tombol Tata Acara: aktif hanya jika file benar-benar PDF.
+   Hosting seperti Cloudflare Pages bisa menjawab 200 + index.html untuk file yang tidak ada. */
+(function () {
+  var btn = document.getElementById("tataAcaraBtn");
+  if (!btn || !window.fetch) return;
+  fetch(btn.getAttribute("href"), { method: "HEAD" }).then(function (r) {
+    var type = (r.headers.get("content-type") || "").toLowerCase();
+    if (!r.ok || type.indexOf("pdf") === -1) {
+      btn.classList.add("is-disabled");
+      btn.removeAttribute("download");
+      btn.innerHTML = '<span>Tata Acara Ibadah Natal</span><span class="soon">Segera hadir</span>';
+      btn.setAttribute("aria-disabled", "true");
+    }
+  }).catch(function () { /* mis. dibuka lewat file:// - biarkan tombol aktif */ });
+})();
+</script>
+
 
 </body>
 </html>
