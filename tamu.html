@@ -422,7 +422,8 @@ details.acc:last-of-type{border-bottom:1px solid var(--line)}
     var o=orphans(),box=$("orph");
     if(role!=="admin"||!o.length){box.hidden=true;box.innerHTML="";return}
     var hadir=o.reduce(function(n,r){return n+(r.hadir==="Ya"?(parseInt(r.jml,10)||1):0)},0);
-    var opts='<option value="">Cocokkan ke tamu…</option>'+guests.map(function(g){return '<option value="'+g.id+'">'+esc(g.nama)+'</option>'}).join("");
+    var katCount={};guests.forEach(function(g){var k=g.kat||"Tanpa kategori";katCount[k]=(katCount[k]||0)+1});
+    var opts='<option value="">Cocokkan ke kategori…</option>'+guests.map(function(g){var k=g.kat||"Tanpa kategori";return '<option value="'+g.id+'">'+esc(katCount[k]>1?k+" · "+g.nama:k)+'</option>'}).join("");
     box.hidden=false;
     box.innerHTML='<h2>RSVP dari nama yang belum ada di daftar ('+o.length+')</h2>'+
       '<p class="hint" style="margin:0 0 6px">Belum dihitung pada statistik di atas'+(hadir?(' (termasuk '+hadir+' orang yang akan hadir)'):'')+
@@ -432,7 +433,7 @@ details.acc:last-of-type{border-bottom:1px solid var(--line)}
           '<div class="g-meta">'+(r.hadir==="Ya"?("Hadir · "+(parseInt(r.jml,10)||1)+" orang"):"Tidak hadir")+'</div></div>'+
           '<span class="badge s-'+(r.hadir==="Ya"?"hadir":"tidak")+'">'+(r.hadir==="Ya"?"Hadir":"Tidak hadir")+'</span></div>'+
           (r.ucap?'<div class="g-ucap">“'+esc(r.ucap)+'”</div>':'')+
-          '<div class="o-act"><button class="btn sm" data-o="add">Tambahkan ke daftar</button>'+(guests.length?'<select data-o="match" aria-label="Cocokkan ke tamu">'+opts+'</select>':'')+'</div></div>';
+          '<div class="o-act"><button class="btn sm" data-o="add">Tambahkan ke daftar</button>'+(guests.length?'<select data-o="match" aria-label="Cocokkan ke kategori">'+opts+'</select>':'')+'</div></div>';
       }).join("")+
       (o.length>1?'<div class="row" style="margin-top:10px"><button class="btn sm ghost" data-o="all">Tambahkan semua</button></div>':'');
     box._rows=o;
