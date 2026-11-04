@@ -420,7 +420,7 @@ details.acc:last-of-type{border-bottom:1px solid var(--line)}
   }
   function renderOrph(){
     var o=orphans(),box=$("orph");
-    if(!o.length){box.hidden=true;box.innerHTML="";return}
+    if(role!=="admin"||!o.length){box.hidden=true;box.innerHTML="";return}
     var hadir=o.reduce(function(n,r){return n+(r.hadir==="Ya"?(parseInt(r.jml,10)||1):0)},0);
     var opts='<option value="">Cocokkan ke tamu…</option>'+guests.map(function(g){return '<option value="'+g.id+'">'+esc(g.nama)+'</option>'}).join("");
     box.hidden=false;
@@ -442,12 +442,14 @@ details.acc:last-of-type{border-bottom:1px solid var(--line)}
       status:r.hadir==="Ya"?"hadir":"tidak",rsvpAt:r.waktu,ucap:r.ucap||"",alias:""});
   }
   $("orph").addEventListener("click",function(e){
+    if(role!=="admin")return;
     var b=e.target.closest("button[data-o]");if(!b)return;
     var box=$("orph"),o=box._rows||[],a=b.getAttribute("data-o");
     if(a==="all"){o.forEach(addGuestFromRsvp);save();render();toast(o.length+" tamu ditambahkan dari RSVP")}
     else if(a==="add"){var r=o[+b.closest(".o").getAttribute("data-i")];if(r){addGuestFromRsvp(r);save();render();toast("Ditambahkan: "+r.nama)}}
   });
   $("orph").addEventListener("change",function(e){
+    if(role!=="admin")return;
     var s=e.target;if(s.getAttribute("data-o")!=="match"||!s.value)return;
     var r=(this._rows||[])[+s.closest(".o").getAttribute("data-i")],g=find(s.value);
     if(!r||!g)return;
