@@ -434,7 +434,7 @@ details.acc:last-of-type{border-bottom:1px solid var(--line)}
           '<div class="g-meta">'+(r.hadir==="Ya"?("Hadir · "+(parseInt(r.jml,10)||1)+" orang"):"Tidak hadir")+'</div></div>'+
           '<span class="badge s-'+(r.hadir==="Ya"?"hadir":"tidak")+'">'+(r.hadir==="Ya"?"Hadir":"Tidak hadir")+'</span></div>'+
           (r.ucap?'<div class="g-ucap">“'+esc(r.ucap)+'”</div>':'')+
-          '<div class="o-act"><button class="btn sm" data-o="add">Tambahkan ke daftar</button>'+(cats.length?'<select data-o="match" aria-label="Tambahkan ke kategori">'+opts+'</select>':'')+'</div></div>';
+          '<div class="o-act"><button class="btn sm" data-o="add">Tambahkan ke daftar</button>'+(cats.length?'<select data-o="match" aria-label="Tambahkan ke kategori">'+opts+'</select>':'')+'<button class="btn sm danger" data-o="del">Hapus</button></div></div>';
       }).join("")+
       (o.length>1?'<div class="row" style="margin-top:10px"><button class="btn sm ghost" data-o="all">Tambahkan semua</button></div>':'');
     box._rows=o;
@@ -448,6 +448,17 @@ details.acc:last-of-type{border-bottom:1px solid var(--line)}
     var b=e.target.closest("button[data-o]");if(!b)return;
     var box=$("orph"),o=box._rows||[],a=b.getAttribute("data-o");
     if(a==="all"){o.forEach(addGuestFromRsvp);save();render();toast(o.length+" tamu ditambahkan dari RSVP")}
+    else if(a==="del"){
+      var d=o[+b.closest(".o").getAttribute("data-i")];if(!d)return;
+      if(!confirm("Hapus RSVP dari \""+d.nama+"\"? RSVP ini akan dihapus permanen dari database."))return;
+      b.disabled=true;var c=cfg();
+      fetch(c.url+"/rest/v1/rpc/delete_rsvp",{method:"POST",headers:hdr(),body:JSON.stringify({p_pin:c.key,p_waktu:d.waktu,p_nama:d.nama})}).then(function(x){return x.json()}).then(function(x){
+        if(x&&x.ok){rsvp=rsvp.filter(function(y){return !(y.waktu===d.waktu&&y.nama===d.nama)});
+          try{localStorage.setItem(RKEY,JSON.stringify({t:fmtTime(new Date()),rows:rsvp}))}catch(e){}
+          render();toast("RSVP dari "+d.nama+" dihapus")}
+        else{b.disabled=false;toast(x&&x.error==="unauthorized"?"Hanya admin yang dapat menghapus RSVP":"Gagal menghapus RSVP. Pastikan SQL delete_rsvp sudah dijalankan.")}
+      }).catch(function(){b.disabled=false;toast("Tidak bisa terhubung ke Supabase")});
+    }
     else if(a==="add"){var r=o[+b.closest(".o").getAttribute("data-i")];if(r){addGuestFromRsvp(r);save();render();toast("Ditambahkan: "+r.nama)}}
   });
   $("orph").addEventListener("change",function(e){
